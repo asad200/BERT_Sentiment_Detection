@@ -27,7 +27,7 @@ train, test = train_test_split(df, test_size=0.2, random_state=seed, shuffle=Tru
 # get the tokenizer from bert model
 tokenizer = FullTokenizer(vocab_file=os.path.join(config.bert_ckpt_dir, 'vocab.txt'))
 
-data = prep.IntentRecognition(train, test, tokenizer, max_seq_len=128)
+data = prep.IntentRecognition(train, test, tokenizer, max_seq_len=156)
 
 model = create_model(data.max_seq_len, config.bert_config_file, config.bert_ckpt_file)
 
