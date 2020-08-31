@@ -6,10 +6,9 @@ class IntentRecognition:
   DATA_COL = 'review'
   LABEL_COL = 'sentiment'
 
-  def __init__(self, train, test, tokenizer:FullTokenizer, classes, max_seq_len=192):
+  def __init__(self, train, test, tokenizer:FullTokenizer, max_seq_len=192):
     self.tokenizer = tokenizer
     self. max_seq_len = 0
-    self.classes = classes
 
     ((self.x_train, self.y_train), (self.x_test, self.y_test)) = map(self._prepare, [train, test])
 
@@ -32,9 +31,8 @@ class IntentRecognition:
       self.max_seq_len = max(self.max_seq_len, len(token_ids))
 
       x.append(token_ids)
-      y.append(self.classes.index(label))
 
-    return np.array(x), np.array(y)
+    return np.array(x), np.array(df[IntentRecognition.LABEL_COL])
 
   def _pad(self, ids):
     x = []

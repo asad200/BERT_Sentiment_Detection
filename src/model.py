@@ -5,7 +5,7 @@ from bert import BertModelLayer
 from bert.loader import StockBertConfig, map_stock_config_to_params, load_stock_weights
 from bert.tokenization.bert_tokenization import FullTokenizer
 
-def create_model(max_seq_len, classes, bert_config_file, bert_ckpt_file):
+def create_model(max_seq_len, bert_config_file, bert_ckpt_file):
   with tf.io.gfile.GFile(bert_config_file, 'r') as reader:
     bs = StockBertConfig.from_json_string(reader.read())
     bert_params = map_stock_config_to_params(bs)
@@ -18,7 +18,7 @@ def create_model(max_seq_len, classes, bert_config_file, bert_ckpt_file):
     cls_out = tf.keras.layers.Dropout(0.5)(cls_out)
     logits = tf.keras.layers.Dense(units=768, activation='tanh')(cls_out)
     logits = tf.keras.layers.Dropout(0.5)(logits)
-    outputs = tf.keras.layers.Dense(units=len(classes), activation='sigmoid')(logits)
+    outputs = tf.keras.layers.Dense(1, activation='sigmoid')(logits)
 
     model = tf.keras.Model(inputs=input_ids, outputs=outputs)
     model.build(input_shape=(None, max_seq_len))

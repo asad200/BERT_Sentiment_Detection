@@ -9,4 +9,4 @@ bert_ckpt_dir = os.path.join('input/model/', bert_model_name)
 bert_ckpt_file = os.path.join(bert_ckpt_dir, 'bert_model.ckpt')
 bert_config_file = os.path.join(bert_ckpt_dir, 'bert_config.json')
 
-checkpoint_filepath = 'output/weights/checkpoint'
+checkpoint_filepath = 'output/weights/checkpoint/cp.ckpt'

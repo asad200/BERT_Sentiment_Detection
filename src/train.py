@@ -12,7 +12,7 @@ from bert.tokenization.bert_tokenization import FullTokenizer
 
 
 
-seed = 42
+seed = 1
 np.random.seed(seed)
 tf.random.set_seed(seed)
 max_seq_len = 192
@@ -20,25 +20,30 @@ max_seq_len = 192
 
 
 df = pd.read_csv('input/IMDB_Dataset.csv')
-train, test = train_test_split(df, test_size=0.2, random_state=seed)
+df['sentiment'] = df['sentiment'].apply(lambda x: 0 if x=='positive' else 1)
+train, test = train_test_split(df, test_size=0.2, random_state=seed, shuffle=True)
 
-classes = train.sentiment.unique().tolist()
 
 # get the tokenizer from bert model
 tokenizer = FullTokenizer(vocab_file=os.path.join(config.bert_ckpt_dir, 'vocab.txt'))
 
-data = prep.IntentRecognition(train, test, tokenizer, classes, max_seq_len=128)
+data = prep.IntentRecognition(train, test, tokenizer, max_seq_len=128)
 
-model = create_model(max_seq_len, classes, config.bert_config_file, config.bert_ckpt_file)
+model = create_model(data.max_seq_len, config.bert_config_file, config.bert_ckpt_file)
 
-model.compile(optimizer=tf.keras.optimizers.Adam(1e-5),
-              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-              metrics=[tf.keras.metrics.SparseTopKCategoricalAccuracy(name='accuracy')])
+
+loss = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+optimizer=tf.keras.optimizers.Adam(1e-5)
+metrics = 'accuracy'
+
+model.compile(optimizer=optimizer,
+              loss=loss,
+              metrics=[metrics])
 
 model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     filepath=config.checkpoint_filepath,
     save_weights_only=True,
-    monitor='val_acc',
+    monitor='val_accuracy',
     mode='max',
     save_best_only=True)
 
@@ -57,7 +62,5 @@ print(test_acc)
 
 predictions = model.predict(data.x_test) >= 0.5
 
-print(classification_report(data.y_test, predictions, target_names=classes))
+print(classification_report(data.y_test, predictions))
 
-# Save the entire model as a SavedModel.
-model.save('saved_model/my_model') 
